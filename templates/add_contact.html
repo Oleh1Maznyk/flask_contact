@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="{{ url_for('add_contact') }}" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group">
+        {{ form.first_name.label(class="form-label") }}
+        {{ form.first_name(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.last_name.label(class="form-label") }}
+        {{ form.last_name(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.city_name.label(class="form-label") }}
+        {{ form.city_name(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.bio_name.label(class="form-label") }}
+        {{ form.bio_name(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.file_name.label(class="form-label") }}
+        {{ form.file_name(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.submit(class="form-label") }}
+    </div>
+</form>
+{% endblock content %}
