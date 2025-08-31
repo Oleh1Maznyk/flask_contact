@@ -1,4 +1,5 @@
 from uuid import uuid4
+import pickle
 
 from flask import Flask, render_template, request, url_for, flash, redirect
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
@@ -34,15 +35,23 @@ login_manager.login_view = "sign_in"
 login_manager.init_app(app)
 
 
-# with app.app_context():
-    # db.drop_all()
-    # db.create_all()
+with app.app_context():
+    db.drop_all()
+    db.create_all()
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    print("Пішов запит до бази даних")
-    return User.query.filter_by(id=user_id).first_or_404()
+    # cache.clear()
+    user = cache.get(user_id)
+    if user:
+        user = pickle.loads(user)
+        print("Дані з кешу")
+    else:
+        user = User.query.filter_by(id=user_id).first_or_404()
+        cache.set(user_id, pickle.dumps(user))
+        print("Пішов запит до бази даних")
+    return user
 
 
 @app.route("/singUp/", methods=["GET", "POST"])
@@ -94,9 +103,16 @@ def sign_in():
 
 @app.get("/")
 @login_required
-@cache.cached(timeout=30, query_string=True)
 def cabinet():
-    return render_template("cabinet.html")
+    contacts = cache.get(f"contacts_{current_user.id}")
+    if contacts:
+        contacts = pickle.loads(contacts)
+        print("Контакти з кешу")
+    else:
+        contacts = current_user.contacts
+        cache.set(f"contacts_{current_user.id}", pickle.dumps(contacts))
+        print("Контакти з бази даних")
+    return render_template("cabinet.html", contacts=contacts)
 
 
 @app.route("/contact/", methods=["GET", "POST"])
